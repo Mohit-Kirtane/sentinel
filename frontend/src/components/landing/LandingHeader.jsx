@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+import { PortfolioMark } from "../icons/PortfolioMark.jsx";
+
 export function LandingHeader() {
   return (
     <header className="border-b border-line">
@@ -14,13 +16,27 @@ export function LandingHeader() {
           <a href="#how-it-works" className="transition hover:text-text">
             How it works
           </a>
+          <a href="#features" className="transition hover:text-text">
+            Features
+          </a>
         </nav>
-        <Link
-          to="/login"
-          className="rounded-md bg-rec px-4 py-2 font-display text-[12px] font-medium tracking-wide text-white transition hover:bg-rec-deep"
-        >
-          SIGN IN
-        </Link>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://portfolio-mohit-kirtane.vercel.app/"
+            target="_blank"
+            rel="noreferrer"
+            title="Mohit Kirtane's portfolio"
+            className="text-text-dim transition hover:text-rec"
+          >
+            <PortfolioMark className="h-4 w-4" />
+          </a>
+          <Link
+            to="/login"
+            className="rounded-md bg-rec px-4 py-2 font-display text-[12px] font-medium tracking-wide text-white transition hover:bg-rec-deep"
+          >
+            SIGN IN
+          </Link>
+        </div>
       </div>
     </header>
   );
