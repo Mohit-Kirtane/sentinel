@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 
+from app.auth.dependencies import get_current_username
 from app.chat.answer import build_answer
 from app.chat.retrieval import retrieve_segments
 from app.core.config import get_settings
@@ -8,7 +9,7 @@ from app.core.llm import chat_complete, embed_text, get_client
 from app.db.repository import PostgresRepository
 from app.db.session import get_session
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_username)])
 
 
 def get_repo():

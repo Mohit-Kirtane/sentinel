@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 
+from app.api.routes import auth as auth_routes
 from app.api.routes import videos as videos_routes
 from app.core.config import get_settings
 
@@ -44,6 +45,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+app.include_router(auth_routes.router, prefix="/api")
 app.include_router(videos_routes.router, prefix="/api")
 
 static_dir = "app/static"

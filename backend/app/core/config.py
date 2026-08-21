@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 5
     retrieval_similarity_threshold: float = 0.3
 
+    jwt_secret: str = "dev-secret-change-me-in-production"
+    jwt_expire_minutes: int = 60 * 24 * 7  # 7 days
+    cookie_secure: bool = False
+
+    demo_username: str = "demo"
+    demo_password_hash: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:
