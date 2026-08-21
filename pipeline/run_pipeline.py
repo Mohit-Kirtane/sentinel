@@ -18,6 +18,19 @@ embeddings run locally via sentence-transformers, no API key needed for that
 part).
 """
 
+import os
+
+# Must be set before transformers/tokenizers/torch get imported anywhere in
+# this process (detect_regions' ultralytics/opencv, then core.llm's
+# sentence-transformers both load torch here). tokenizers' Rust extension
+# disables its own internal parallelism after a fork (dam_server.py is
+# spawned via subprocess.Popen) but that interacts badly with opencv's and
+# torch's own native threading in the same process, surfacing as a
+# non-Python "free(): invalid pointer" crash rather than a catchable
+# exception - reproduced running the real pipeline in Colab.
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
 import argparse
 import logging
 import tempfile
