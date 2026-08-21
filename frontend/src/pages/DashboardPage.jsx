@@ -46,6 +46,23 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="mb-6 rounded-lg border border-line bg-surface p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded border border-timestamp/40 bg-timestamp/10 px-1.5 py-0.5 font-display text-[9px] tracking-wide text-timestamp">
+              SAMPLE FOOTAGE
+            </span>
+            <p className="font-body text-sm text-text-dim">
+              These are precomputed demo clips, already run through the full pipeline.
+            </p>
+          </div>
+          <p className="mt-2 font-body text-xs leading-relaxed text-text-dim">
+            Frames are sampled, every person/object region is detected (YOLOv8n) and described in
+            detail (NVIDIA's DAM-3B-Video), then embedded locally
+            (sentence-transformers) and indexed for retrieval — so the chatbot answers are
+            grounded in what's actually in the footage, not a guess.
+          </p>
+        </div>
+
         <VideoPicker videos={videos} selectedId={selectedId} onSelect={setSelectedId} />
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
