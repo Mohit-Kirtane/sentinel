@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
     llm_chat_model: str = "gemini-3.6-flash"
-    llm_embedding_model: str = "text-embedding-004"
+    llm_embedding_model: str = "gemini-embedding-001"
+    llm_embedding_dimensions: int = 768
 
     retrieval_top_k: int = 5
     retrieval_similarity_threshold: float = 0.3

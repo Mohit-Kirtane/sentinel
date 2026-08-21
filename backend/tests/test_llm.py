@@ -13,8 +13,9 @@ class _FakeEmbeddingResponse:
 
 class _FakeEmbeddings:
     def create(self, **kwargs):
-        assert kwargs["model"] == "text-embedding-004"
+        assert kwargs["model"] == "gemini-embedding-001"
         assert kwargs["input"] == "a person walks past the counter"
+        assert kwargs["dimensions"] == 768
         return _FakeEmbeddingResponse([0.1, 0.2, 0.3])
 
 

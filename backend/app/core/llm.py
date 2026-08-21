@@ -10,8 +10,11 @@ def get_client() -> OpenAI:
 
 def embed_text(text: str, client: OpenAI | None = None, model: str | None = None) -> list[float]:
     client = client or get_client()
-    model = model or get_settings().llm_embedding_model
-    response = client.embeddings.create(model=model, input=text)
+    settings = get_settings()
+    model = model or settings.llm_embedding_model
+    response = client.embeddings.create(
+        model=model, input=text, dimensions=settings.llm_embedding_dimensions
+    )
     return response.data[0].embedding
 
 
