@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0c0e;
+  --color-surface: #12161a;
+  --color-surface-raised: #191f24;
+  --color-line: #262e35;
+  --color-text: #e4e7ea;
+  --color-text-dim: #8b9198;
+  --color-rec: #e0483e;
+  --color-rec-deep: #a8352d;
+  --color-timestamp: #d9a441;
+
+  --font-display: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+::selection {
+  background: var(--color-rec);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-rec);
+  outline-offset: 2px;
+}
+
+@keyframes rec-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.rec-pulse {
+  animation: rec-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.scan-sweep {
+  animation: scan-sweep 3.5s linear infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-pulse,
+  .scan-sweep,
+  .fade-up {
+    animation: none;
+    opacity: 1;
+  }
+}
