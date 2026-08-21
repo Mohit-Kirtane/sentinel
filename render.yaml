@@ -12,7 +12,3 @@ services:
         generateValue: true
       - key: COOKIE_SECURE
         value: "true"
-      - key: DEMO_USERNAME
-        sync: false
-      - key: DEMO_PASSWORD_HASH
-        sync: false

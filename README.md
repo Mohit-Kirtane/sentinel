@@ -52,8 +52,7 @@ cd backend
 pip install -r requirements.txt
 cp ../.env.example .env
 # edit .env: DATABASE_URL (a pgvector-enabled Postgres - Neon's free
-# tier works), LLM_API_KEY (https://aistudio.google.com/apikey), and
-# generate DEMO_PASSWORD_HASH per the comment in .env.example
+# tier works) and LLM_API_KEY (https://aistudio.google.com/apikey)
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -107,11 +106,11 @@ web service, `sentinel-api`.
    own free Postgres which expires after 30 days) with the `vector`
    extension enabled.
 2. On Render: **New → Blueprint**, point it at this repo.
-3. Fill in the `sync: false` env vars: `DATABASE_URL` (from Neon),
+3. Fill in the `sync: false` env vars: `DATABASE_URL` (from Neon) and
    `LLM_API_KEY` (from
-   [Google AI Studio](https://aistudio.google.com/apikey)),
-   `DEMO_USERNAME`, and `DEMO_PASSWORD_HASH` (generate per the comment
-   in `.env.example`). `JWT_SECRET` is auto-generated.
+   [Google AI Studio](https://aistudio.google.com/apikey)). `JWT_SECRET`
+   is auto-generated. Users register their own account from the
+   landing page - no seeded credentials needed.
 4. Run the offline pipeline against at least one demo video before
    relying on the live chat - without precomputed segments, the app has
    videos listed but nothing for the chatbot to answer from.
