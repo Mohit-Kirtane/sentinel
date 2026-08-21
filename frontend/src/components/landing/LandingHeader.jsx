@@ -20,15 +20,15 @@ export function LandingHeader() {
             Features
           </a>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <a
             href="https://portfolio-mohit-kirtane.vercel.app/"
             target="_blank"
             rel="noreferrer"
-            title="Mohit Kirtane's portfolio"
-            className="text-text-dim transition hover:text-rec"
+            className="hidden items-center gap-1.5 font-body text-sm text-text-dim transition hover:text-text sm:flex"
           >
             <PortfolioMark className="h-4 w-4" />
+            Portfolio
           </a>
           <Link
             to="/login"
