@@ -8,3 +8,16 @@ sqlalchemy==2.0.52
 psycopg2-binary==2.9.12
 pgvector==0.5.0
 pydantic-settings==2.15.0
+# app.core.llm imports langchain_openai/langchain_huggingface at module level
+# even though the pipeline only ever calls embed_text(), not chat_complete().
+langchain-core==1.6.0
+langchain-openai==1.6.0
+langchain-huggingface==1.2.2
+# Pinned to 4.1.0, not the newer 6.0.0 used by backend/requirements.txt:
+# this package installs into the SAME environment as `dam` (see the
+# notebook), and sentence-transformers>=5.0.0 requires transformers>=5.0.0,
+# which conflicts with the transformers<5 pin DAM needs. 4.1.0 requires
+# transformers<5.0.0,>=4.41.0 - compatible with both DAM's floor
+# (>=4.41.2) and that ceiling. The underlying all-MiniLM-L6-v2 model
+# weights are unchanged across these wrapper versions.
+sentence-transformers==4.1.0

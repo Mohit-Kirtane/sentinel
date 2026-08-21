@@ -1,10 +1,29 @@
-export async function login(username, password) {
+async function parseErrorDetail(res, fallback) {
+  try {
+    const body = await res.json();
+    return body.detail || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export async function register(email, password) {
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error(await parseErrorDetail(res, "Could not create an account"));
+  return res.json();
+}
+
+export async function login(email, password) {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error("Invalid username or password");
+  if (!res.ok) throw new Error(await parseErrorDetail(res, "Invalid email or password"));
   return res.json();
 }
 

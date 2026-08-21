@@ -86,8 +86,14 @@ pytest
      --video frontend/public/demo-videos/<name>.mp4 \
      --video-id <name> \
      --title "Human-readable title" \
-     --dam-server-url http://localhost:8000
+     --dam-server-url http://localhost:8000 \
+     --frame-skip 2
    ```
+
+   `--frame-skip N` only sends every Nth *extracted* frame through DAM (the
+   expensive step) - consecutive sampled frames of a mostly-static scene are
+   highly redundant, so this cuts real cost/time independently of
+   `--interval-seconds`' own sampling rate.
 
 3. Redeploy the frontend with the new clip committed.
 

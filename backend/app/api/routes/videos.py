@@ -1,15 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 
-from app.auth.dependencies import get_current_username
-from app.chat.answer import build_answer
-from app.chat.retrieval import retrieve_segments
+from app.auth.dependencies import get_current_user
+from app.chat.graph import build_chat_graph
 from app.core.config import get_settings
-from app.core.llm import chat_complete, embed_text, get_client
+from app.core.llm import chat_complete, embed_text
 from app.db.repository import PostgresRepository
 from app.db.session import get_session
 
-router = APIRouter(dependencies=[Depends(get_current_username)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def get_repo():
@@ -21,13 +20,26 @@ def get_repo():
 
 
 def get_embed_fn():
-    client = get_client()
-    return lambda text: embed_text(text, client=client)
+    return embed_text
 
 
 def get_chat_fn():
-    client = get_client()
-    return lambda messages: chat_complete(messages, client=client)
+    return chat_complete
+
+
+def get_chat_graph(
+    repo=Depends(get_repo),
+    embed_fn=Depends(get_embed_fn),
+    chat_fn=Depends(get_chat_fn),
+):
+    settings = get_settings()
+    return build_chat_graph(
+        repo,
+        embed_fn,
+        chat_fn,
+        k=settings.retrieval_top_k,
+        similarity_threshold=settings.retrieval_similarity_threshold,
+    )
 
 
 class VideoOut(BaseModel):
@@ -63,20 +75,11 @@ def chat(
     video_id: str,
     payload: ChatRequest,
     repo=Depends(get_repo),
-    embed_fn=Depends(get_embed_fn),
-    chat_fn=Depends(get_chat_fn),
+    graph=Depends(get_chat_graph),
 ):
     video = repo.get_video(video_id)
     if video is None:
         raise HTTPException(status_code=404, detail="Video not found")
 
-    settings = get_settings()
-    segments = retrieve_segments(
-        video_id,
-        payload.question,
-        repo=repo,
-        embed_fn=embed_fn,
-        k=settings.retrieval_top_k,
-        similarity_threshold=settings.retrieval_similarity_threshold,
-    )
-    return build_answer(payload.question, segments, chat_fn=chat_fn)
+    result = graph.invoke({"video_id": video_id, "question": payload.question})
+    return {"answer": result["answer"], "citations": result["citations"]}

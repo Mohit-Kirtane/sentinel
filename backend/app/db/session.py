@@ -24,3 +24,11 @@ def get_session() -> Session:
     if _SessionFactory is None:
         _SessionFactory = sessionmaker(bind=get_engine())
     return _SessionFactory()
+
+
+def get_db():
+    session = get_session()
+    try:
+        yield session
+    finally:
+        session.close()

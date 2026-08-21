@@ -10,9 +10,12 @@ Usage:
         --video path/to/clip.mp4 \\
         --video-id lobby-01 \\
         --title "Lobby Camera" \\
-        --dam-server-url http://localhost:8000
+        --dam-server-url http://localhost:8000 \\
+        --frame-skip 2
 
-Requires env vars: DATABASE_URL, LLM_API_KEY (Gemini, for embeddings).
+Requires env vars: DATABASE_URL, LLM_API_KEY (Gemini, for chat generation -
+embeddings run locally via sentence-transformers, no API key needed for that
+part).
 """
 
 import argparse
@@ -22,7 +25,7 @@ import tempfile
 from openai import OpenAI
 from sqlalchemy.orm import sessionmaker
 
-from app.core.llm import embed_text, get_client as get_embedding_client
+from app.core.llm import embed_text
 from app.db.repository import PostgresRepository
 from app.db.session import get_engine
 from pipeline.build_segments import build_segments
@@ -34,12 +37,31 @@ from pipeline.extract_frames import extract_frames
 logger = logging.getLogger(__name__)
 
 
-def run(video_path: str, video_id: str, title: str, dam_server_url: str, interval_seconds: float = 2.0):
+def run(
+    video_path: str,
+    video_id: str,
+    title: str,
+    dam_server_url: str,
+    interval_seconds: float = 2.0,
+    frame_skip: int = 1,
+):
+    """frame_skip: only send every Nth *extracted* frame through DAM (1 = every
+    frame). Consecutive sampled frames of a mostly-static scene are highly
+    redundant - DAM is the expensive, rate-limited step, so thinning here
+    cuts real cost/time on top of extract_frames' own interval_seconds
+    sampling, independent of it (e.g. sample every 1.5s for finer
+    timestamps, but only describe every 2nd of those)."""
     dam_client = OpenAI(api_key="unused", base_url=dam_server_url)
-    embedding_client = get_embedding_client()
 
     with tempfile.TemporaryDirectory() as frames_dir:
-        frames = extract_frames(video_path, frames_dir, interval_seconds=interval_seconds)
+        all_frames = extract_frames(video_path, frames_dir, interval_seconds=interval_seconds)
+        frames = all_frames[::frame_skip]
+        logger.info(
+            "Extracted %d frames, describing %d after frame_skip=%d",
+            len(all_frames),
+            len(frames),
+            frame_skip,
+        )
 
         region_descriptions = []
         for frame in frames:
@@ -63,9 +85,7 @@ def run(video_path: str, video_id: str, title: str, dam_server_url: str, interva
                 )
 
     segments = build_segments(region_descriptions, window_seconds=10.0)
-    segments_with_embeddings = embed_segments(
-        segments, embed_fn=lambda text: embed_text(text, client=embedding_client)
-    )
+    segments_with_embeddings = embed_segments(segments, embed_fn=embed_text)
 
     Session = sessionmaker(bind=get_engine())
     with Session() as session:
@@ -91,5 +111,18 @@ if __name__ == "__main__":
     parser.add_argument("--title", required=True)
     parser.add_argument("--dam-server-url", required=True)
     parser.add_argument("--interval-seconds", type=float, default=2.0)
+    parser.add_argument(
+        "--frame-skip",
+        type=int,
+        default=1,
+        help="Only describe every Nth extracted frame via DAM (1 = every frame).",
+    )
     args = parser.parse_args()
-    run(args.video, args.video_id, args.title, args.dam_server_url, args.interval_seconds)
+    run(
+        args.video,
+        args.video_id,
+        args.title,
+        args.dam_server_url,
+        args.interval_seconds,
+        args.frame_skip,
+    )

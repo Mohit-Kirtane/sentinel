@@ -1,28 +1,27 @@
-from app.core.llm import embed_text
-
-
-class _FakeEmbeddingData:
-    def __init__(self, embedding):
-        self.embedding = embedding
-
-
-class _FakeEmbeddingResponse:
-    def __init__(self, embedding):
-        self.data = [_FakeEmbeddingData(embedding)]
+from app.core.llm import chat_complete, embed_text
 
 
 class _FakeEmbeddings:
-    def create(self, **kwargs):
-        assert kwargs["model"] == "gemini-embedding-001"
-        assert kwargs["input"] == "a person walks past the counter"
-        assert kwargs["dimensions"] == 768
-        return _FakeEmbeddingResponse([0.1, 0.2, 0.3])
-
-
-class _FakeClient:
-    embeddings = _FakeEmbeddings()
+    def embed_query(self, text):
+        assert text == "a person walks past the counter"
+        return [0.1, 0.2, 0.3]
 
 
 def test_embed_text_returns_the_embedding_vector():
-    result = embed_text("a person walks past the counter", client=_FakeClient())
+    result = embed_text("a person walks past the counter", embeddings=_FakeEmbeddings())
     assert result == [0.1, 0.2, 0.3]
+
+
+class _FakeResponse:
+    content = "A person walks past the counter carrying a bag."
+
+
+class _FakeLLM:
+    def invoke(self, messages):
+        assert messages == [("user", "describe what happens")]
+        return _FakeResponse()
+
+
+def test_chat_complete_returns_the_response_content():
+    result = chat_complete([{"role": "user", "content": "describe what happens"}], llm=_FakeLLM())
+    assert result == "A person walks past the counter carrying a bag."

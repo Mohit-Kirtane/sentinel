@@ -4,23 +4,28 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 export default function LoginPage() {
-  const { username, signIn } = useAuth();
+  const { email, signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [mode, setMode] = useState("signin"); // "signin" | "signup"
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  if (username) return <Navigate to="/app" replace />;
+  if (email) return <Navigate to="/app" replace />;
 
   async function handleSubmit(event) {
     event.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      await signIn(form.username, form.password);
+      if (mode === "signin") {
+        await signIn(form.email, form.password);
+      } else {
+        await signUp(form.email, form.password);
+      }
       navigate("/app");
-    } catch {
-      setError("Invalid username or password.");
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -35,14 +40,21 @@ export default function LoginPage() {
             SENTINEL
           </span>
         </div>
-        <h2 className="font-body text-lg font-semibold text-text">Sign in</h2>
-        <p className="mt-1 font-body text-sm text-text-dim">Access the monitoring console.</p>
+        <h2 className="font-body text-lg font-semibold text-text">
+          {mode === "signin" ? "Sign in" : "Create an account"}
+        </h2>
+        <p className="mt-1 font-body text-sm text-text-dim">
+          {mode === "signin"
+            ? "Access the monitoring console."
+            : "Get access to the monitoring console."}
+        </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-3">
           <input
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-            placeholder="Username"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            placeholder="Email"
             autoFocus
             className="w-full rounded-md border border-line bg-bg px-3 py-2 font-body text-sm text-text placeholder:text-text-dim focus:outline-none"
           />
@@ -59,9 +71,19 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-md bg-rec px-4 py-2 font-display text-[12px] font-medium tracking-wide text-white transition hover:bg-rec-deep disabled:opacity-40"
           >
-            {loading ? "SIGNING IN…" : "SIGN IN"}
+            {loading ? "PLEASE WAIT…" : mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
           </button>
         </form>
+
+        <button
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setError(null);
+          }}
+          className="mt-4 w-full font-body text-sm text-text-dim transition hover:text-text"
+        >
+          {mode === "signin" ? "Need an account? Create one" : "Already have an account? Sign in"}
+        </button>
       </div>
     </div>
   );
