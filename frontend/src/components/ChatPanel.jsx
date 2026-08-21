@@ -45,17 +45,21 @@ function MessageBubble({ message, onSeek }) {
   );
 }
 
+const SUGGESTED_QUESTIONS = [
+  "What vehicles are visible in this footage?",
+  "Summarize what happens in this footage.",
+  "What are the people in this footage wearing?",
+];
+
 export function ChatPanel({ videoId, onSeek }) {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (!question.trim() || !videoId) return;
+  async function ask(asked) {
+    if (!asked.trim() || !videoId) return;
 
-    const asked = question;
     setMessages((prev) => [...prev, { role: "user", text: asked }]);
     setQuestion("");
     setLoading(true);
@@ -74,6 +78,11 @@ export function ChatPanel({ videoId, onSeek }) {
     }
   }
 
+  function handleSubmit(event) {
+    event.preventDefault();
+    ask(question);
+  }
+
   return (
     <div className="flex h-full flex-col rounded-lg border border-line bg-surface">
       <div className="flex items-center gap-2 border-b border-line px-3 py-2">
@@ -82,9 +91,23 @@ export function ChatPanel({ videoId, onSeek }) {
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <p className="font-body text-sm text-text-dim">
-            Ask about what happens in this footage — e.g. "did anyone leave a bag near the counter?"
-          </p>
+          <div>
+            <p className="font-body text-sm text-text-dim">
+              Ask about what happens in this footage, or try one of these:
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {SUGGESTED_QUESTIONS.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => ask(suggestion)}
+                  disabled={!videoId || loading}
+                  className="rounded-md border border-line px-2.5 py-1 font-body text-xs text-text-dim transition hover:border-rec-deep hover:text-text disabled:opacity-40"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {messages.map((message, index) => (
           <MessageBubble key={index} message={message} onSeek={onSeek} />
