@@ -44,9 +44,12 @@ class PostgresRepository:
         return list(self.session.execute(stmt).scalars().all())
 
     def insert_video(self, video: Video) -> None:
-        self.session.add(video)
+        self.session.merge(video)
         self.session.commit()
 
     def insert_segments(self, segments: list[Segment]) -> None:
+        if segments:
+            video_id = segments[0].video_id
+            self.session.query(Segment).filter(Segment.video_id == video_id).delete()
         self.session.add_all(segments)
         self.session.commit()

@@ -38,4 +38,7 @@ class FakeRepository:
         self.videos[video.id] = video
 
     def insert_segments(self, segments: list[Segment]) -> None:
+        if segments:
+            video_id = segments[0].video_id
+            self.segments = [s for s in self.segments if s.video_id != video_id]
         self.segments.extend(segments)

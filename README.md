@@ -86,7 +86,7 @@ pytest
      --video frontend/public/demo-videos/<name>.mp4 \
      --video-id <name> \
      --title "Human-readable title" \
-     --dam-server-url http://localhost:8000/v1
+     --dam-server-url http://localhost:8000
    ```
 
 3. Redeploy the frontend with the new clip committed.

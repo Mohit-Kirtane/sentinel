@@ -18,6 +18,9 @@ class _FakeRepository:
         self.videos[video.id] = video
 
     def insert_segments(self, segments):
+        if segments:
+            video_id = segments[0].video_id
+            self.segments = [s for s in self.segments if s.video_id != video_id]
         self.segments.extend(segments)
 
 
@@ -56,3 +59,35 @@ def test_store_video_and_segments_writes_to_the_repository():
     stored = repo.top_k_similar("vid-1", [0.1, 0.2], k=5)
     assert len(stored) == 1
     assert stored[0].description == "a person walks in"
+
+
+def test_store_video_and_segments_is_safe_to_rerun_for_the_same_video():
+    repo = _FakeRepository()
+    first_run = [
+        {"start_ts": 0.0, "end_ts": 10.0, "description": "a person walks in", "embedding": [0.1, 0.2]},
+    ]
+    store_video_and_segments(
+        video_id="vid-1",
+        title="Lobby Camera",
+        filename="lobby.mp4",
+        duration_seconds=60,
+        segments_with_embeddings=first_run,
+        repo=repo,
+    )
+
+    second_run = [
+        {"start_ts": 0.0, "end_ts": 10.0, "description": "corrected description", "embedding": [0.3, 0.4]},
+    ]
+    store_video_and_segments(
+        video_id="vid-1",
+        title="Lobby Camera (retitled)",
+        filename="lobby.mp4",
+        duration_seconds=60,
+        segments_with_embeddings=second_run,
+        repo=repo,
+    )
+
+    assert repo.get_video("vid-1").title == "Lobby Camera (retitled)"
+    stored = repo.top_k_similar("vid-1", [0.3, 0.4], k=5)
+    assert len(stored) == 1
+    assert stored[0].description == "corrected description"

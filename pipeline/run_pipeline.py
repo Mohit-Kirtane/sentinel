@@ -10,7 +10,7 @@ Usage:
         --video path/to/clip.mp4 \\
         --video-id lobby-01 \\
         --title "Lobby Camera" \\
-        --dam-server-url http://localhost:8000/v1
+        --dam-server-url http://localhost:8000
 
 Requires env vars: DATABASE_URL, LLM_API_KEY (Gemini, for embeddings).
 """
