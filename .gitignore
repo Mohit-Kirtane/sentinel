@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+*.egg-info/
+node_modules/
+dist/
+frontend/dist/
+data/
+*.mp4
+!frontend/public/demo-videos/*.mp4
+.DS_Store
+docs/superpowers/
+*.pt
