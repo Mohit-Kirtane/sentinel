@@ -22,14 +22,21 @@ import os
 
 # Must be set before transformers/tokenizers/torch get imported anywhere in
 # this process (detect_regions' ultralytics/opencv, then core.llm's
-# sentence-transformers both load torch here). tokenizers' Rust extension
-# disables its own internal parallelism after a fork (dam_server.py is
-# spawned via subprocess.Popen) but that interacts badly with opencv's and
-# torch's own native threading in the same process, surfacing as a
-# non-Python "free(): invalid pointer" crash rather than a catchable
-# exception - reproduced running the real pipeline in Colab.
+# sentence-transformers both load torch here).
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+# The real crash: Colab preinstalls TensorFlow and JAX, and transformers
+# probes for every backend at import time even though we only ever use
+# PyTorch. Loading TensorFlow's native libraries (protobuf/absl/its own CUDA
+# runtime bits) into the same process as PyTorch and opencv (via
+# ultralytics) corrupts memory on load, surfacing as a non-Python
+# "free(): invalid pointer" crash right as transformers imports - reproduced
+# running the real pipeline in Colab, immediately after the "TensorFlow
+# version ... available" log line. These env vars are transformers' own
+# documented switches to skip those backends entirely.
+os.environ.setdefault("USE_TF", "0")
+os.environ.setdefault("USE_FLAX", "0")
 
 import argparse
 import logging
